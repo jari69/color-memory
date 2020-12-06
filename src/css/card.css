@@ -37,6 +37,10 @@
     background: gray;
 }
 
+.white {
+    background: white;
+}
+
 .flip {
     transform: rotateY(180deg);
     background: black;
