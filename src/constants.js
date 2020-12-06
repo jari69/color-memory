@@ -21,6 +21,6 @@ export const colors = {
         color: "orange"
     },
     7: {
-        color: "black"
+        color: "gray"
     }
 }

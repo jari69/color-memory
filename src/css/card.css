@@ -1,7 +1,44 @@
 .rectangle {
-    display: inline-block;
     width: 100px;
     height: 100px;
     background: black;
     margin: 5px;
+}
+
+.red {
+    background: red;
+}
+
+.blue {
+    background: blue;
+}
+
+.green {
+    background: green;
+}
+
+.purple {
+    background: purple;
+}
+
+.pink {
+    background: pink;
+}
+
+.yellow {
+    background: yellow;
+}
+
+.orange {
+    background: orange;
+}
+
+.black {
+    background: gray;
+}
+
+.flip {
+    transform: rotateY(180deg);
+    background: black;
+
 }
