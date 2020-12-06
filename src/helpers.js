@@ -9,8 +9,6 @@ export const randomNumberGenerator = () => {
 export const findNextColor = (colorsPicked) => {
     for(let i = 0 ; i <= 7; i++) {
         if(colorsPicked[i] < 2 ) {
-            
-            console.log("i", i);
             return i;
         }
     }

@@ -2,8 +2,9 @@ import React, { Component } from "react";
 import Card from "./components/Card";
 import { randomNumberGenerator, findNextColor } from "./helpers";
 import { colors } from "./constants";
-import { Col, Row, Container } from "react-bootstrap";
+import { Col, Row, Container, Button, Modal} from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import firebase from './firebase.js';
 
 export class App extends Component {
   constructor() {
@@ -14,6 +15,8 @@ export class App extends Component {
       score: 0,
       firstPick: {},
       secondPick: {},
+      show: false,
+      highscores: []
     };
   }
 
@@ -53,6 +56,22 @@ export class App extends Component {
         });
       }
     }
+
+    const leaderBoardRef = firebase.database().ref('leaderboard');
+    leaderBoardRef.on('value', (snapshot) => {
+      let leaders = snapshot.val();
+      let newState = [];
+      for (let leader in leaders) {
+        newState.push({
+          id: leader,
+          score: leaders[leader].score,
+          playerName: leaders[leader].playerName
+        });
+      }
+      this.setState({
+        highscores: [...newState]
+      });
+    });
   }
 
   resetCards = () => {
@@ -81,10 +100,22 @@ export class App extends Component {
     this.setState({ cardData: duplicate });
   };
 
+  // check if all are removed
+  isAllRemoved = () => {
+    const {cardData} = this.state;
+    for(let i = 0; i < cardData.length; i ++ ) {
+      // console.log(cardData[i][`card_${i}`].isRemoved);
+      if(cardData[i][`card_${i}`].isRemoved === false) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   handleClick = async (key) => {
     const duplicate = this.state.cardData;
     duplicate[key][`card_${key}`].isFlipped = true;
-
+    var playerName = '';
     //get cards that are flipped recently and compare
     await this.setState({
       cardData: [...duplicate],
@@ -102,10 +133,19 @@ export class App extends Component {
       });
 
       if (this.state.firstPick.color === this.state.secondPick.color) {
-        this.setState({ score: this.state.score + 5 });
-
-        //a function for setting isRemoved to true
+        await this.setState({ score: this.state.score + 5 });
+        
         this.removeCards();
+        if(this.isAllRemoved()) {
+          playerName = prompt("Enter Your Name");
+          const leaderboardRef = firebase.database().ref('leaderboard');
+          const leader = {
+            playerName: playerName,
+            score: this.state.score
+          }
+          leaderboardRef.push(leader);
+        }
+        // console.log(gamerName);
       } else {
         setTimeout(()=>{
           this.resetCards();
@@ -117,13 +157,42 @@ export class App extends Component {
     await this.setState({ cardData: [...duplicate] });
   };
 
+  toggleShow = () => {
+    this.setState({ show: !this.state.show});
+  }
   render() {
-    const { cardData } = this.state;
+    const { cardData, show } = this.state;
 
     // console.log(cardData);
     return (
       <div>
         <h1>Color Memory</h1>
+        <Button variant="primary" style={{float: 'right'}} onClick={this.toggleShow}>
+          Highscores
+        </Button>
+
+        <Modal show={show} onHide={this.toggleShow}>
+          <Modal.Header closeButton>
+            <Modal.Title>HighScores</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+
+          {this.state.highscores.map((highscore) => {
+            return (
+              <li key={highscore.id}>
+                <h3>{highscore.score}</h3>
+                <p>brought by: {highscore.playerName}</p>
+              </li>
+            )
+          })}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={this.toggleShow}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
         <Container>
           <Row>
             {cardData
