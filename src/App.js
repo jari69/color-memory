@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import Card from "./components/Card";
 import { randomNumberGenerator, findNextColor } from "./helpers";
 import { colors } from "./constants";
-import { Col, Row, Container, Button, Modal} from "react-bootstrap";
+import { Col, Row, Container, Button, Modal, Table} from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import firebase from './firebase.js';
 
@@ -68,8 +68,10 @@ export class App extends Component {
           playerName: leaders[leader].playerName
         });
       }
+
+      const descending = newState.sort((a, b) => Number(b.score) - Number(a.score));
       this.setState({
-        highscores: [...newState]
+        highscores: [...descending]
       });
     });
   }
@@ -104,7 +106,6 @@ export class App extends Component {
   isAllRemoved = () => {
     const {cardData} = this.state;
     for(let i = 0; i < cardData.length; i ++ ) {
-      // console.log(cardData[i][`card_${i}`].isRemoved);
       if(cardData[i][`card_${i}`].isRemoved === false) {
         return false;
       }
@@ -115,6 +116,7 @@ export class App extends Component {
   handleClick = async (key) => {
     const duplicate = this.state.cardData;
     duplicate[key][`card_${key}`].isFlipped = true;
+    
     var playerName = '';
     //get cards that are flipped recently and compare
     await this.setState({
@@ -145,7 +147,6 @@ export class App extends Component {
           }
           leaderboardRef.push(leader);
         }
-        // console.log(gamerName);
       } else {
         setTimeout(()=>{
           this.resetCards();
@@ -161,30 +162,49 @@ export class App extends Component {
     this.setState({ show: !this.state.show});
   }
   render() {
-    const { cardData, show } = this.state;
+    const { cardData, show, score } = this.state;
 
-    // console.log(cardData);
     return (
       <div>
-        <h1>Color Memory</h1>
-        <Button variant="primary" style={{float: 'right'}} onClick={this.toggleShow}>
-          Highscores
-        </Button>
+        <Container>
+          <Row className="justify-content-between mt-3">
+          <h1>Color Memory</h1>
+          <h2 className="score">
+            Current Score:{score}
+          </h2>
+          <Button variant="primary" style={{float: 'right'}} onClick={this.toggleShow}>
+            Highscores
+          </Button>
+          </Row>
+        </Container>
 
         <Modal show={show} onHide={this.toggleShow}>
           <Modal.Header closeButton>
-            <Modal.Title>HighScores</Modal.Title>
+            <Modal.Title>Highscores</Modal.Title>
           </Modal.Header>
           <Modal.Body>
 
-          {this.state.highscores.map((highscore) => {
-            return (
-              <li key={highscore.id}>
-                <h3>{highscore.score}</h3>
-                <p>brought by: {highscore.playerName}</p>
-              </li>
-            )
-          })}
+          <Table>
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {this.state.highscores.map((highscore, index) => {
+                return (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{highscore.playerName}</td>
+                    <td>{highscore.score}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </Table>
+
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={this.toggleShow}>
@@ -192,14 +212,15 @@ export class App extends Component {
             </Button>
           </Modal.Footer>
         </Modal>
+        <br/>
+        <br/>
 
         <Container>
           <Row>
             {cardData
               ? cardData.map((card, key) => {
                   return (
-                    //this is too long, fix me
-                    <Col xs={3} lg={3} xl={3}>
+                    <Col xs={3} lg={3} xl={3} key={key} >
                       <Card
                         color={
                           typeof card[`card_${key}`] !== "undefined"
@@ -215,6 +236,7 @@ export class App extends Component {
                             : false
                         }
                         isRemoved={card[`card_${key}`].isRemoved}
+                        
                       />
                     </Col>
                   );
