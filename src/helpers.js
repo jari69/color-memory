@@ -1,3 +1,5 @@
+import firebase from './firebase';
+
 export const randomNumberGenerator = () => {
 
     let max = 7;

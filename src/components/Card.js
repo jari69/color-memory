@@ -4,10 +4,10 @@ import "../css/card.css";
 export class Card extends Component {
   computeColor = () => {
       if(this.props.isFlipped) {
-          if (this.props.isRemoved) {
-            return "white";
-          }
-          return this.props.color;
+        if (this.props.isRemoved) {
+          return "white";
+        }
+        return this.props.color;
       }
       else {
           return "black";
@@ -15,7 +15,6 @@ export class Card extends Component {
   };
 
   render() {
-    const { color } = this.props;
 
     return (
       <div

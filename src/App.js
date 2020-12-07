@@ -22,6 +22,7 @@ export class App extends Component {
 
   async componentDidMount() {
     const colorsPicked = [0, 0, 0, 0, 0, 0, 0, 0];
+    const leaderBoardRef = firebase.database().ref('leaderboard');
 
     for (let i = 0; i < 16; i++) {
       let pickedColor = randomNumberGenerator();
@@ -57,7 +58,6 @@ export class App extends Component {
       }
     }
 
-    const leaderBoardRef = firebase.database().ref('leaderboard');
     leaderBoardRef.on('value', (snapshot) => {
       let leaders = snapshot.val();
       let newState = [];
@@ -116,7 +116,7 @@ export class App extends Component {
   handleClick = async (key) => {
     const duplicate = this.state.cardData;
     duplicate[key][`card_${key}`].isFlipped = true;
-    
+    const leaderboardRef = firebase.database().ref('leaderboard');
     var playerName = '';
     //get cards that are flipped recently and compare
     await this.setState({
@@ -124,11 +124,11 @@ export class App extends Component {
       flipCount: this.state.flipCount + 1,
     });
 
-    if (this.state.flipCount == 1) {
+    if (this.state.flipCount === 1) {
       await this.setState({
         firstPick: { color: duplicate[key][`card_${key}`].color, key },
       });
-    } else if (this.state.flipCount == 2) {
+    } else if (this.state.flipCount === 2) {
       await this.setState({
         secondPick: { color: duplicate[key][`card_${key}`].color, key },
         flipCount: 0
@@ -139,10 +139,15 @@ export class App extends Component {
         
         this.removeCards();
         if(this.isAllRemoved()) {
-          playerName = prompt("Enter Your Name");
-          const leaderboardRef = firebase.database().ref('leaderboard');
+          //validation is checking for duplicate names and making sure value should not be null
+          while(1){
+            playerName = prompt("Enter your name");
+            if(playerName){
+              break;
+            }
+          }
           const leader = {
-            playerName: playerName,
+            playerName: playerName.toLowerCase(),
             score: this.state.score
           }
           leaderboardRef.push(leader);
@@ -168,13 +173,13 @@ export class App extends Component {
       <div>
         <Container>
           <Row className="justify-content-between mt-3">
-          <h1>Color Memory</h1>
-          <h2 className="score">
-            Current Score:{score}
-          </h2>
-          <Button variant="primary" style={{float: 'right'}} onClick={this.toggleShow}>
-            Highscores
-          </Button>
+            <h1>Color Memory</h1>
+            <h2>
+              Current Score:{score}
+            </h2>
+            <Button variant="primary" style={{float: 'right'}} onClick={this.toggleShow}>
+              Highscores
+            </Button>
           </Row>
         </Container>
 
@@ -184,7 +189,7 @@ export class App extends Component {
           </Modal.Header>
           <Modal.Body>
 
-          <Table>
+          <Table responsive>
             <thead>
               <tr>
                 <th>Rank</th>
@@ -194,7 +199,7 @@ export class App extends Component {
             </thead>
             <tbody>
               {this.state.highscores.map((highscore, index) => {
-                return (
+                return ( index > 7 ? null:
                   <tr key={index}>
                     <td>{index + 1}</td>
                     <td>{highscore.playerName}</td>
