@@ -6,7 +6,7 @@ Instructions:
 3.) Open your terminal and enter into the root directory of the project folder.
 4.) Install the dependencies and packages using yarn install or npm install.
 5.) Once it is done installing, run the project using the command yarn start or npm start.
-
+6.) If you have any questions or concerns, please contact me at jarimesina1234@gmail.com or 8481 5306.
 ## Available Scripts
 
 In the project directory, you can run:
